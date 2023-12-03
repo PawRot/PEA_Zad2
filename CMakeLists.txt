@@ -16,4 +16,8 @@ add_executable(PEA_Zad2 menu/main.cpp
         rapidXML/rapidxml.hpp
         rapidXML/rapidxml_iterators.hpp
         rapidXML/rapidxml_print.hpp
-        rapidXML/rapidxml_utils.hpp)
+        rapidXML/rapidxml_utils.hpp
+        algorithms/simulatedAnnealing.cpp
+        algorithms/simulatedAnnealing.h
+        algorithms/greedy.cpp
+        algorithms/greedy.h)

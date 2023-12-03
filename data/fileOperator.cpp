@@ -116,6 +116,8 @@ std::vector<int> fileOperator::loadPathFromFile(const std::string& filePath) {
 
 std::vector<std::vector<int>> fileOperator::loadXMLDataFromFile(const std::string& path) {
 
+    int numberOfCities = 0;
+
     rapidxml::file<> xmlFile(path.c_str());
 
 
@@ -133,8 +135,26 @@ std::vector<std::vector<int>> fileOperator::loadXMLDataFromFile(const std::strin
     // print name of root node
     std::cout << "Root node name: " << rootNode->name() << std::endl;
 
+    rapidxml::xml_node<> *graphNode = rootNode->first_node("graph");
 
-    return {};
+    for (rapidxml::xml_node<> *vertexNode = graphNode->first_node("vertex"); vertexNode; vertexNode = vertexNode->next_sibling()) {
+        numberOfCities++;
+    }
+
+    std::vector<std::vector<int>> matrix(numberOfCities, std::vector<int>(numberOfCities, 0));
+
+    int i = 0;
+    for (rapidxml::xml_node<> *vertexNode = graphNode->first_node("vertex"); vertexNode; vertexNode = vertexNode->next_sibling(), i++) {
+        for (rapidxml::xml_node<> *edgeNode = vertexNode->first_node("edge"); edgeNode; edgeNode = edgeNode->next_sibling()) {
+            int j = std::stoi(edgeNode->value());
+            double doubleCost = std::stod(edgeNode->first_attribute("cost")->value());
+            int cost = static_cast<int>(doubleCost);
+            matrix[i][j] = cost;
+        }
+    }
+
+
+    return matrix;
 }
 
 void fileOperator::saveResultFile(const string &path, const vector<long long> &data) {

@@ -4,6 +4,7 @@
 #include <stack>
 #include "../data/fileOperator.h"
 #include "../data/dataGenerator.h"
+#include "../algorithms/greedy.h"
 // #include "../tests/tester.h"
 using std::vector, std::string;
 
@@ -15,11 +16,11 @@ vector<vector<int>> generateData(bool &dataLoaded);
 
 void displayCurrentData(const vector<vector<int>> &data);
 
-void setStopCriterion(bool &stopCriterionSet);
+int setStopCriterion(bool &stopCriterionSet);
 
 void setTempChangeFactor(int &tempChangeFactor);
 
-void startSimulatedAnnealing(vector<vector<int>> &testData, vector<int> &path);
+void startSimulatedAnnealing(vector<vector<int>> &testData, vector<int> &path, int &tempChangeFactor, int &stopCriterion);
 
 void savePathToFile(const vector<int> &path);
 
@@ -50,6 +51,7 @@ int main(int argc, char **argv) {
     string input;
     bool dataLoaded = false;
     bool stopCriterionSet = false;
+    int stopCriterion = 0;
     bool pathLoaded = false;
     int tempChangefactor = 0;
     vector<vector<int>> testData;
@@ -91,7 +93,7 @@ int main(int argc, char **argv) {
                 break;
             case 4:
                 std::cout << std::endl;
-                setStopCriterion(stopCriterionSet);
+                stopCriterion = setStopCriterion(stopCriterionSet);
                 std::cout << std::endl;
                 break;
             case 5:
@@ -100,9 +102,8 @@ int main(int argc, char **argv) {
                 std::cout << std::endl;
                 break;
             case 6:
-                std::cout << std::endl;
-                if (dataLoaded && stopCriterionSet) {
-                    startSimulatedAnnealing(testData, path);
+                if (true /*dataLoaded && stopCriterionSet*/) {
+                    startSimulatedAnnealing(testData, path, tempChangefactor, stopCriterion); // TODO uncomment when i finish simulated annealing
                 } else {
                     std::cout << "No data loaded or no stop criteria set" << std::endl;
                 }
@@ -159,7 +160,7 @@ vector<vector<int>> loadFromFile(bool &dataLoaded) {
     std::cout << "Loading data from file: " << filePath << std::endl;
     // auto data = fileOperator::loadDataFromFile(filePath);
     auto data = fileOperator::loadXMLDataFromFile(filePath);
-    if (!data.empty()) {
+    if (!data.empty() || !data[0].empty()) {
         std::cout << "Data loaded successfully" << std::endl;
         dataLoaded = true;
         return data;
@@ -240,7 +241,7 @@ void displayCurrentData(const vector<vector<int>> &data) {
 
 }
 
-void setStopCriterion(bool &stopCriterionSet) {
+int setStopCriterion(bool &stopCriterionSet) {
     std::cout << "Enter stop criterion in seconds: ";
     string input;
     std::cin >> input;
@@ -250,17 +251,18 @@ void setStopCriterion(bool &stopCriterionSet) {
     } catch (std::invalid_argument &e) {
         std::cout << "Invalid argument" << std::endl;
         stopCriterionSet = false;
-        return;
+        return -1;
     }
 
     if (stopCriterion < 1) {
         std::cout << "Stop criterion must be greater than 0" << std::endl;
         stopCriterionSet = false;
-        return;
+        return -1;
     }
 
     std::cout << "Stop criterion set to: " << stopCriterion << std::endl;
     stopCriterionSet = true;
+    return stopCriterion;
 }
 
 void setTempChangeFactor(int &tempChangeFactor) { // TODO change tempChangeFactor when i figure out how it works
@@ -284,7 +286,29 @@ void setTempChangeFactor(int &tempChangeFactor) { // TODO change tempChangeFacto
     tempChangeFactor = tempChangeFactorInput;
 }
 
-void startSimulatedAnnealing(vector<vector<int>>&testData, vector<int>&path) {
+void startSimulatedAnnealing(vector<vector<int>>&testData, vector<int>&path, int &tempChangeFactor, int &stopCriterion) {
+    std::cout << "Starting Simulated Annealing" << std::endl;
+    std::cout << std::endl;
+    greedy greedy(testData);
+    auto result = greedy.findShortestPath();
+    std::cout << "Best path found: " << std::endl;
+    for (auto element : std::get<1>(result)){
+        std::cout << element << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "Cost of path: " << std::get<0>(result) << std::endl;
+    // auto result = simulatedAnnealing::simulatedAnnealingAlgorithm(testData, tempChangeFactor, stopCriterion);
+    // std::cout << "Best path found: " << std::endl;
+    // for (auto element : result.path){
+    //     std::cout << element << " ";
+    // }
+    // std::cout << std::endl;
+    // std::cout << "Cost of path: " << result.cost << std::endl;
+    // std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(result.executionTime).count() << " nanoseconds" << std::endl;
+    // path = result.path;
+    // pathLoaded = true;
+    // std::cout << "End temperature: " << result.endTemperature << std::endl;
+    // std::cout << "exp(-1/T_k): " << result.exp << std::endl; TODO use exponential function
 
 }
 
