@@ -5,7 +5,9 @@
 #include <vector>
 #include <fstream>
 #include <iomanip>
-
+#include "../rapidXML/rapidxml.hpp"
+#include "../rapidXML/rapidxml_utils.hpp"
+#include "../rapidXML/rapidxml_print.hpp"
 
 
 
@@ -20,7 +22,8 @@ public:
 
     static std::vector<std::vector<int>> loadDataFromFile(const std::string &path);
     static std::vector<int> loadPathFromFile(const std::string &filePath);
-};
+
+    static std::vector<std::vector<int>> loadXMLDataFromFile(const std::string &path);};
 
 
 #endif //PEA_ZAD2_FILEOPERATOR_H

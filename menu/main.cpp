@@ -157,7 +157,8 @@ vector<vector<int>> loadFromFile(bool &dataLoaded) {
     std::cin >> filePath;
 
     std::cout << "Loading data from file: " << filePath << std::endl;
-    auto data = fileOperator::loadDataFromFile(filePath);
+    // auto data = fileOperator::loadDataFromFile(filePath);
+    auto data = fileOperator::loadXMLDataFromFile(filePath);
     if (!data.empty()) {
         std::cout << "Data loaded successfully" << std::endl;
         dataLoaded = true;

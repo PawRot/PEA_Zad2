@@ -114,6 +114,29 @@ std::vector<int> fileOperator::loadPathFromFile(const std::string& filePath) {
     return {};
 }
 
+std::vector<std::vector<int>> fileOperator::loadXMLDataFromFile(const std::string& path) {
+
+    rapidxml::file<> xmlFile(path.c_str());
+
+
+    rapidxml::xml_document<> document;
+
+    try {
+        document.parse<0>(xmlFile.data());
+    } catch (const rapidxml::parse_error &e) {
+        std::cout << "Parse error: " << e.what() << std::endl;
+        return {};
+    }
+
+    // get root node
+    rapidxml::xml_node<> *rootNode = document.first_node();
+    // print name of root node
+    std::cout << "Root node name: " << rootNode->name() << std::endl;
+
+
+    return {};
+}
+
 void fileOperator::saveResultFile(const string &path, const vector<long long> &data) {
     std::ofstream file;
     file.open(path, std::ios::app);

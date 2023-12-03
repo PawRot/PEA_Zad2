@@ -12,4 +12,8 @@ add_executable(PEA_Zad2 menu/main.cpp
         data/dataGenerator.cpp
         data/dataGenerator.h
         data/fileOperator.cpp
-        data/fileOperator.h)
+        data/fileOperator.h
+        rapidXML/rapidxml.hpp
+        rapidXML/rapidxml_iterators.hpp
+        rapidXML/rapidxml_print.hpp
+        rapidXML/rapidxml_utils.hpp)
