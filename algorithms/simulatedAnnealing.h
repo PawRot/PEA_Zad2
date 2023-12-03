@@ -17,7 +17,7 @@ private:
     int greedyCost;
     int numberOfCities;
     int stopCriterion;
-    double temperature;
+    long double temperature;
     double coolingRate;
 
 
@@ -30,7 +30,7 @@ public:
 
     std::tuple<int, std::vector<int>> simulatedAnnealingAlgorithm();
 
-    [[nodiscard]] double getTemperature() const {
+    [[nodiscard]] long double getTemperature() const {
         return temperature;
     }
 

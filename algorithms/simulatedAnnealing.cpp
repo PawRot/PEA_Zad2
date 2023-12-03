@@ -2,7 +2,9 @@
 // Created by Michał Zychowicz on 03/12/2023.
 //
 
+#include <iostream>
 #include "simulatedAnnealing.h"
+
 
 
 simulatedAnnealing::simulatedAnnealing(const std::vector<std::vector<int>>&matrix, double coolingRate, int stopCriterion, const std::tuple<int, std::vector<int>>&greedyResult)
@@ -10,7 +12,7 @@ simulatedAnnealing::simulatedAnnealing(const std::vector<std::vector<int>>&matri
     numberOfCities = static_cast<int>(matrix.size());
     auto greedyPath = std::get<1>(greedyResult);
     path = {greedyPath.begin(), greedyPath.end() - 1};
-    temperature = numberOfCities * numberOfCities;
+    temperature = pow(numberOfCities, 2);
     greedyCost = std::get<0>(greedyResult);
 }
 
@@ -27,21 +29,26 @@ int simulatedAnnealing::pathCost(const std::vector<int>&path) {
 std::vector<int> simulatedAnnealing::findShortestPath() {
     int currentCost = greedyCost;
     std::chrono::duration<float> timeElapsed = std::chrono::duration<float>::zero();
-    // std::chrono::d
     const auto start = std::chrono::steady_clock::now();
 
     while (std::chrono::duration_cast<std::chrono::seconds>(timeElapsed) < std::chrono::seconds(stopCriterion)) {
         std::vector<int> newPath = path;
-        int swapIndex1 = rand() % numberOfCities;
-        int swapIndex2 = rand() % numberOfCities;
-        std::swap(newPath[swapIndex1], newPath[swapIndex2]);
 
-        int newCost = pathCost(newPath);
-        if (newCost < currentCost || exp((currentCost - newCost) / temperature) > ((double) rand() / (RAND_MAX))) {
-            path = newPath;
-            currentCost = newCost;
+        for (int i = 0; i <= 10; i++) {
+            int swapIndex1 = rand() % numberOfCities;
+            int swapIndex2;
+            do {
+                swapIndex2 = rand() % numberOfCities;
+            } while (swapIndex1 == swapIndex2);
+            std::swap(newPath[swapIndex1], newPath[swapIndex2]);
+
+            int newCost = pathCost(newPath);
+            if (newCost < currentCost || exp((currentCost - newCost) / temperature) > ((double) rand() / (RAND_MAX))) {
+                path = newPath;
+                currentCost = newCost;
+            }
         }
-
+        // std::cout << temperature << std::endl;
         temperature *= coolingRate;
         timeElapsed = std::chrono::steady_clock::now() - start;
     }

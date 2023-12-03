@@ -315,7 +315,8 @@ void startSimulatedAnnealing(vector<vector<int>>&testData, vector<int>&path, dou
     pathLoaded = true;
     auto endTemperature = simulatedAnnealing.getTemperature();
     std::cout << "End temperature: " << endTemperature << std::endl;
-    std::cout << "exp(-1/T_k): " << exp(-1.0/endTemperature) << std::endl; //TODO use exponential function
+    auto exponent = exp(-1/endTemperature);
+    std::cout << "exp(-1/T_k): " << exponent << std::endl; //TODO use exponential function
 
 }
 
@@ -347,7 +348,6 @@ vector<int> loadPathFromFile(bool&pathLoaded) {
         pathLoaded = false;
         return {};
     }
-
 }
 
 void calculateCost(const vector<vector<int>>&testData, const vector<int>&path) {
