@@ -5,6 +5,7 @@
 #include "../data/fileOperator.h"
 #include "../data/dataGenerator.h"
 #include "../algorithms/greedy.h"
+#include "../algorithms/simulatedAnnealing.h"
 // #include "../tests/tester.h"
 using std::vector, std::string;
 
@@ -18,9 +19,9 @@ void displayCurrentData(const vector<vector<int>> &data);
 
 int setStopCriterion(bool &stopCriterionSet);
 
-void setTempChangeFactor(int &tempChangeFactor);
+void setTempChangeFactor(double &tempChangeFactor);
 
-void startSimulatedAnnealing(vector<vector<int>> &testData, vector<int> &path, int &tempChangeFactor, int &stopCriterion);
+void startSimulatedAnnealing(vector<vector<int>> &testData, vector<int> &path, double &tempChangeFactor, int &stopCriterion, bool &pathLoaded);
 
 void savePathToFile(const vector<int> &path);
 
@@ -53,7 +54,7 @@ int main(int argc, char **argv) {
     bool stopCriterionSet = false;
     int stopCriterion = 0;
     bool pathLoaded = false;
-    int tempChangefactor = 0;
+    double tempChangefactor = 0.99;
     vector<vector<int>> testData;
     vector<int> path;
 
@@ -102,8 +103,8 @@ int main(int argc, char **argv) {
                 std::cout << std::endl;
                 break;
             case 6:
-                if (true /*dataLoaded && stopCriterionSet*/) {
-                    startSimulatedAnnealing(testData, path, tempChangefactor, stopCriterion); // TODO uncomment when i finish simulated annealing
+                if (dataLoaded && stopCriterionSet) {
+                    startSimulatedAnnealing(testData, path, tempChangefactor, stopCriterion, pathLoaded); // TODO uncomment when i finish simulated annealing
                 } else {
                     std::cout << "No data loaded or no stop criteria set" << std::endl;
                 }
@@ -265,20 +266,20 @@ int setStopCriterion(bool &stopCriterionSet) {
     return stopCriterion;
 }
 
-void setTempChangeFactor(int &tempChangeFactor) { // TODO change tempChangeFactor when i figure out how it works
+void setTempChangeFactor(double &tempChangeFactor) { // TODO change tempChangeFactor when i figure out how it works
     std::cout << "Enter temperature change factor: ";
     string input;
     std::cin >> input;
-    int tempChangeFactorInput;
+    double tempChangeFactorInput;
     try {
-        tempChangeFactorInput = std::stoi(input);
+        tempChangeFactorInput = std::stod(input);
     } catch (std::invalid_argument &e) {
         std::cout << "Invalid argument" << std::endl;
         return;
     }
 
-    if (tempChangeFactorInput < 1) {
-        std::cout << "Temperature change factor must be greater than 0" << std::endl;
+    if (tempChangeFactorInput < 0 || tempChangeFactorInput >= 1) {
+        std::cout << "Temperature change factor must be greater than 0 and lower than 1" << std::endl;
         return;
     }
 
@@ -286,29 +287,35 @@ void setTempChangeFactor(int &tempChangeFactor) { // TODO change tempChangeFacto
     tempChangeFactor = tempChangeFactorInput;
 }
 
-void startSimulatedAnnealing(vector<vector<int>>&testData, vector<int>&path, int &tempChangeFactor, int &stopCriterion) {
+void startSimulatedAnnealing(vector<vector<int>>&testData, vector<int>&path, double &tempChangeFactor, int &stopCriterion, bool &pathLoaded) {
     std::cout << "Starting Simulated Annealing" << std::endl;
     std::cout << std::endl;
     greedy greedy(testData);
-    auto result = greedy.findShortestPath();
-    std::cout << "Best path found: " << std::endl;
-    for (auto element : std::get<1>(result)){
+    auto greedyResult = greedy.findShortestPath();
+    std::cout << "Best greedy path found: " << std::endl;
+    for (auto element : std::get<1>(greedyResult)){
         std::cout << element << " ";
     }
     std::cout << std::endl;
+    std::cout << "Cost of greedy path: " << std::get<0>(greedyResult) << std::endl;
+
+    simulatedAnnealing simulatedAnnealing(testData, tempChangeFactor, stopCriterion, greedyResult);
+
+    auto result = simulatedAnnealing.simulatedAnnealingAlgorithm();
+
+    // auto result = simulatedAnnealing::simulatedAnnealingAlgorithm(testData, tempChangeFactor, stopCriterion, greedyResult);
+    std::cout << "Best path found: " << std::endl;
+    for (auto element : std::get<1>(result)){
+    std::cout << element << " ";
+    }
+    std::cout << std::endl;
     std::cout << "Cost of path: " << std::get<0>(result) << std::endl;
-    // auto result = simulatedAnnealing::simulatedAnnealingAlgorithm(testData, tempChangeFactor, stopCriterion);
-    // std::cout << "Best path found: " << std::endl;
-    // for (auto element : result.path){
-    //     std::cout << element << " ";
-    // }
-    // std::cout << std::endl;
-    // std::cout << "Cost of path: " << result.cost << std::endl;
     // std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(result.executionTime).count() << " nanoseconds" << std::endl;
-    // path = result.path;
-    // pathLoaded = true;
-    // std::cout << "End temperature: " << result.endTemperature << std::endl;
-    // std::cout << "exp(-1/T_k): " << result.exp << std::endl; TODO use exponential function
+    path = std::get<1>(result);
+    pathLoaded = true;
+    auto endTemperature = simulatedAnnealing.getTemperature();
+    std::cout << "End temperature: " << endTemperature << std::endl;
+    std::cout << "exp(-1/T_k): " << exp(-1.0/endTemperature) << std::endl; //TODO use exponential function
 
 }
 
