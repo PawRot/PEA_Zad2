@@ -25,6 +25,8 @@ private:
 
     std::tuple<int, std::vector<int>, std::chrono::duration<float>> findShortestPath();
 
+    double calculateStartingTemperature() const;
+
 
 public:
     simulatedAnnealing(const std::vector<std::vector<int>>& matrix, long double coolingRate, int stopCriterion, const std::tuple<int, std::vector<int>>&greedyResult);

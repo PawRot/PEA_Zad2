@@ -12,8 +12,37 @@ simulatedAnnealing::simulatedAnnealing(const std::vector<std::vector<int>>&matri
     numberOfCities = static_cast<int>(matrix.size());
     auto greedyPath = std::get<1>(greedyResult);
     path = {greedyPath.begin(), greedyPath.end() - 1};
-    temperature = pow(numberOfCities, 2);
+    temperature = calculateStartingTemperature();
     greedyCost = std::get<0>(greedyResult);
+}
+
+
+double simulatedAnnealing::calculateStartingTemperature() const {
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution index(0, numberOfCities - 1);
+
+    int numberOfSwaps = numberOfCities * (numberOfCities-1) * 4;
+    // int numberOfSwaps = numberOfCities * numberOfCities * 2;
+    numberOfSwaps = numberOfSwaps > 15000 ? 15000 : numberOfSwaps;
+    int sum = 0;
+
+    for (int i = 0; i < numberOfSwaps; i++) {
+        auto neighborPath = path;
+        const int swapIndex1 = index(mt);
+        int swapIndex2;
+        do {
+            swapIndex2 = index(mt);
+        } while (swapIndex1 == swapIndex2);
+        std::swap(neighborPath[swapIndex1], neighborPath[swapIndex2]);
+        sum += abs(pathCost(path) - pathCost(neighborPath));
+        // sum += (pathCost(path) - pathCost(neighborPath));
+    }
+
+    sum /= numberOfSwaps;
+    std::cout << sum << std::endl;
+    std::cout << (-1*sum)/log(0.99) << std::endl;
+    return (-1*sum)/log(0.99);
 }
 
 
