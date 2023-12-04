@@ -40,8 +40,8 @@ double simulatedAnnealing::calculateStartingTemperature() const {
     }
 
     sum /= numberOfSwaps;
-    std::cout << sum << std::endl;
-    std::cout << (-1*sum)/log(0.99) << std::endl;
+    // std::cout << sum << std::endl;
+    // std::cout << (-1*sum)/log(0.99) << std::endl;
     return (-1*sum)/log(0.99);
 }
 
@@ -104,7 +104,7 @@ std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnneali
 
 std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnnealing::simulatedAnnealingAlgorithm() {
     auto result = findShortestPath();
-    std::get<1>(result).push_back(0);
+    std::get<1>(result).push_back(std::get<1>(result)[0]);
     return result;
 }
 

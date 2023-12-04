@@ -31,9 +31,51 @@ void calculateCost(const vector<vector<int>> &testData, const vector<int> &path)
 int main(int argc, char **argv) {
     if (argc > 1 && std::string(argv[1]) == "testMode"){ // enter test mode
 
-        if (std::string(argv[2]) == "maxN"){
+        auto data = fileOperator::loadXMLDataFromFile("/Users/michal/Developer/Repozytoria/PEA_Zad2/data/ftv55.xml");
 
+        greedy greedy(data);
+        const auto greedyResult = greedy.findShortestPath();
+
+        static std::vector<double> coolingRates = {};
+        for (int i = 4; i < 10; ++i){
+            coolingRates.push_back(i*0.1);
         }
+        coolingRates.push_back(0.99);
+        coolingRates.push_back(0.999);
+        coolingRates.push_back(0.9999);
+
+        for (auto element : coolingRates) {
+            std::cout << element << std::endl;
+        }
+
+        int bestKnownCost = 1608;
+
+        int bestPathCost = INT_MAX;
+        vector<int> bestPath = {};
+
+        std::cout << "Testing file: ftv55.xml" << std::endl;
+        for (const auto coolingRate : coolingRates) {
+            std::cout << "Testing cooling rate: " << coolingRate << std::endl;
+            int averagePathCost = 0;
+            for (int i = 0; i < 10; ++i) {
+                std::cout << "Test number: " << i << std::endl;
+                simulatedAnnealing simulatedAnnealing(data, coolingRate, 120, greedyResult);
+                const auto result = simulatedAnnealing.simulatedAnnealingAlgorithm();
+                averagePathCost += std::get<0>(result);
+                if (std::get<0>(result) < bestPathCost){
+                    bestPathCost = std::get<0>(result);
+                    bestPath = std::get<1>(result);
+                }
+            }
+            averagePathCost /= 10;
+            double percentageError = (static_cast<double>(averagePathCost) / static_cast<double>(bestKnownCost))*100;
+            fileOperator::saveResultFile("ftv55_test.csv", {static_cast<int>(coolingRate*10000), averagePathCost, bestPathCost, static_cast<int>(percentageError*10000)});
+            // saveResultFile works on integers only, so i multiply by 10000 and then divide by 10000 to get 4 decimal places
+            fileOperator::savePathToFile("ftv55_test_path.txt", bestPath);
+        }
+
+
+
 
 
         exit(0);
