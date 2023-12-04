@@ -1,7 +1,5 @@
 #include <iostream>
 #include <thread>
-#include <future>
-#include <stack>
 #include "../data/fileOperator.h"
 #include "../data/dataGenerator.h"
 #include "../algorithms/greedy.h"
@@ -21,7 +19,7 @@ int setStopCriterion(bool &stopCriterionSet);
 
 void setTempChangeFactor(long double &tempChangeFactor);
 
-void startSimulatedAnnealing(vector<vector<int>> &testData, vector<int> &path, long double &tempChangeFactor, int &stopCriterion, bool &pathLoaded);
+void startSimulatedAnnealing(const vector<vector<int>> &testData, vector<int> &path, const long double &tempChangeFactor, const int &stopCriterion, bool &pathLoaded);
 
 void savePathToFile(const vector<int> &path);
 
@@ -33,12 +31,7 @@ void calculateCost(const vector<vector<int>> &testData, const vector<int> &path)
 int main(int argc, char **argv) {
     if (argc > 1 && std::string(argv[1]) == "testMode"){ // enter test mode
 
-        if (std::string(argv[2]) == "maxN"){ // will only work on exe compiled with testEnable flag
-
-        }
-
-        if(std::string(argv[2]) == "timeMeasure"){
-
+        if (std::string(argv[2]) == "maxN"){
 
         }
 
@@ -266,7 +259,7 @@ int setStopCriterion(bool &stopCriterionSet) {
     return stopCriterion;
 }
 
-void setTempChangeFactor(long double &tempChangeFactor) { // TODO change tempChangeFactor when i figure out how it works
+void setTempChangeFactor(long double &tempChangeFactor) {
     std::cout << "Enter temperature change factor: ";
     string input;
     std::cin >> input;
@@ -287,13 +280,13 @@ void setTempChangeFactor(long double &tempChangeFactor) { // TODO change tempCha
     tempChangeFactor = tempChangeFactorInput;
 }
 
-void startSimulatedAnnealing(vector<vector<int>>&testData, vector<int>&path, long double &tempChangeFactor, int &stopCriterion, bool &pathLoaded) {
+void startSimulatedAnnealing(const vector<vector<int>>&testData, vector<int>&path, const long double &tempChangeFactor, const int &stopCriterion, bool &pathLoaded){
     std::cout << "Starting Simulated Annealing" << std::endl;
     std::cout << std::endl;
     greedy greedy(testData);
-    auto greedyResult = greedy.findShortestPath();
+    const auto greedyResult = greedy.findShortestPath();
     std::cout << "Best greedy path found: " << std::endl;
-    for (auto element : std::get<1>(greedyResult)){
+    for (const auto element : std::get<1>(greedyResult)){
         std::cout << element << " ";
     }
     std::cout << std::endl;
@@ -301,21 +294,21 @@ void startSimulatedAnnealing(vector<vector<int>>&testData, vector<int>&path, lon
 
     simulatedAnnealing simulatedAnnealing(testData, tempChangeFactor, stopCriterion, greedyResult);
 
-    auto result = simulatedAnnealing.simulatedAnnealingAlgorithm();
+    const auto result = simulatedAnnealing.simulatedAnnealingAlgorithm();
 
     // auto result = simulatedAnnealing::simulatedAnnealingAlgorithm(testData, tempChangeFactor, stopCriterion, greedyResult);
     std::cout << "Best path found: " << std::endl;
-    for (auto element : std::get<1>(result)){
+    for (const auto element : std::get<1>(result)){
     std::cout << element << " ";
     }
     std::cout << std::endl;
     std::cout << "Cost of path: " << std::get<0>(result) << std::endl;
-    // std::cout << "Execution time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(result.executionTime).count() << " nanoseconds" << std::endl;
+    std::cout << "Best path found after: " << std::chrono::duration_cast<std::chrono::milliseconds>(std::get<2>(result)).count() << " milliseconds" << std::endl;
     path = std::get<1>(result);
     pathLoaded = true;
-    auto endTemperature = simulatedAnnealing.getTemperature();
+    const auto endTemperature = simulatedAnnealing.getTemperature();
     std::cout << "End temperature: " << endTemperature << std::endl;
-    auto exponent = exp((-1/endTemperature));
+    const auto exponent = exp((-1/endTemperature));
     std::cout << "exp(-1/T_k): " << exponent << std::endl;
 
 }

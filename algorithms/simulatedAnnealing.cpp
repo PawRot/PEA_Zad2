@@ -26,10 +26,15 @@ int simulatedAnnealing::pathCost(const std::vector<int>&path) const {
     return cost;
 }
 
-std::vector<int> simulatedAnnealing::findShortestPath() {
+std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnnealing::findShortestPath() {
     int currentCost = greedyCost;
 
-    std::tuple<int, std::vector<int>, std::chrono::duration<float>> bestPath = {INT_MAX, {}, std::chrono::duration<float>::zero()};
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_int_distribution index(0, numberOfCities - 1);
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
+
+    std::tuple<int, std::vector<int>, std::chrono::duration<float>> bestSolution = {INT_MAX, {}, std::chrono::duration<float>::zero()};
 
     std::chrono::duration<float> timeElapsed = std::chrono::duration<float>::zero();
     const auto start = std::chrono::steady_clock::now();
@@ -38,10 +43,10 @@ std::vector<int> simulatedAnnealing::findShortestPath() {
         std::vector<int> newPath = path;
 
         for (int i = 0; i <= (numberOfCities*3)/2; i++) {
-            int swapIndex1 = rand() % numberOfCities;
+            const int swapIndex1 = index(mt);
             int swapIndex2;
             do {
-                swapIndex2 = rand() % numberOfCities;
+                swapIndex2 = index(mt);
             } while (swapIndex1 == swapIndex2);
             std::swap(newPath[swapIndex1], newPath[swapIndex2]);
 
@@ -50,11 +55,10 @@ std::vector<int> simulatedAnnealing::findShortestPath() {
                 path = newPath;
                 currentCost = newCost;
 
-                if (newCost < std::get<0>(bestPath)) {
-                    bestPath = {newCost, newPath, std::chrono::steady_clock::now() - start};
+                if (newCost < std::get<0>(bestSolution)) {
+                    bestSolution = {newCost, newPath, std::chrono::steady_clock::now() - start};
                 }
-
-            } else if (exp((currentCost - newCost) / temperature) > ((double) rand() / (RAND_MAX))) {
+            } else if (exp((currentCost - newCost) / temperature) > (dist(mt))) {
                 path = newPath;
                 currentCost = newCost;
             }
@@ -66,14 +70,13 @@ std::vector<int> simulatedAnnealing::findShortestPath() {
 
     // std::cout << std::endl << std::get<0>(bestPath) << std::endl;
     // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(std::get<2>(bestPath)).count() << std::endl;
-    return path;
+    return bestSolution;
 }
 
-std::tuple<int, std::vector<int>> simulatedAnnealing::simulatedAnnealingAlgorithm() {
+std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnnealing::simulatedAnnealingAlgorithm() {
     auto result = findShortestPath();
-    auto cost = pathCost(result);
-    result.push_back(result[0]);
-    return {cost, result};
+    std::get<1>(result).push_back(0);
+    return result;
 }
 
 

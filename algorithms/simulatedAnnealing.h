@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 #include <chrono>
+#include <random>
 
 class simulatedAnnealing {
 private:
@@ -22,13 +23,13 @@ private:
 
     [[nodiscard]] int pathCost(const std::vector<int>& path) const;
 
-    std::vector<int> findShortestPath();
+    std::tuple<int, std::vector<int>, std::chrono::duration<float>> findShortestPath();
 
 
 public:
     simulatedAnnealing(const std::vector<std::vector<int>>& matrix, long double coolingRate, int stopCriterion, const std::tuple<int, std::vector<int>>&greedyResult);
 
-    std::tuple<int, std::vector<int>> simulatedAnnealingAlgorithm();
+    std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnnealingAlgorithm();
 
     [[nodiscard]] long double getTemperature() const {
         return temperature;
