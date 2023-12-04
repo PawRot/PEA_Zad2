@@ -19,9 +19,9 @@ void displayCurrentData(const vector<vector<int>> &data);
 
 int setStopCriterion(bool &stopCriterionSet);
 
-void setTempChangeFactor(double &tempChangeFactor);
+void setTempChangeFactor(long double &tempChangeFactor);
 
-void startSimulatedAnnealing(vector<vector<int>> &testData, vector<int> &path, double &tempChangeFactor, int &stopCriterion, bool &pathLoaded);
+void startSimulatedAnnealing(vector<vector<int>> &testData, vector<int> &path, long double &tempChangeFactor, int &stopCriterion, bool &pathLoaded);
 
 void savePathToFile(const vector<int> &path);
 
@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
     bool stopCriterionSet = false;
     int stopCriterion = 0;
     bool pathLoaded = false;
-    double tempChangefactor = 0.99;
+    long double tempChangefactor = 0.99;
     vector<vector<int>> testData;
     vector<int> path;
 
@@ -266,11 +266,11 @@ int setStopCriterion(bool &stopCriterionSet) {
     return stopCriterion;
 }
 
-void setTempChangeFactor(double &tempChangeFactor) { // TODO change tempChangeFactor when i figure out how it works
+void setTempChangeFactor(long double &tempChangeFactor) { // TODO change tempChangeFactor when i figure out how it works
     std::cout << "Enter temperature change factor: ";
     string input;
     std::cin >> input;
-    double tempChangeFactorInput;
+    long double tempChangeFactorInput;
     try {
         tempChangeFactorInput = std::stod(input);
     } catch (std::invalid_argument &e) {
@@ -287,7 +287,7 @@ void setTempChangeFactor(double &tempChangeFactor) { // TODO change tempChangeFa
     tempChangeFactor = tempChangeFactorInput;
 }
 
-void startSimulatedAnnealing(vector<vector<int>>&testData, vector<int>&path, double &tempChangeFactor, int &stopCriterion, bool &pathLoaded) {
+void startSimulatedAnnealing(vector<vector<int>>&testData, vector<int>&path, long double &tempChangeFactor, int &stopCriterion, bool &pathLoaded) {
     std::cout << "Starting Simulated Annealing" << std::endl;
     std::cout << std::endl;
     greedy greedy(testData);
@@ -315,8 +315,8 @@ void startSimulatedAnnealing(vector<vector<int>>&testData, vector<int>&path, dou
     pathLoaded = true;
     auto endTemperature = simulatedAnnealing.getTemperature();
     std::cout << "End temperature: " << endTemperature << std::endl;
-    auto exponent = exp(-1/endTemperature);
-    std::cout << "exp(-1/T_k): " << exponent << std::endl; //TODO use exponential function
+    auto exponent = exp((-1/endTemperature));
+    std::cout << "exp(-1/T_k): " << exponent << std::endl;
 
 }
 

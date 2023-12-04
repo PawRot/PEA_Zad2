@@ -18,15 +18,15 @@ private:
     int numberOfCities;
     int stopCriterion;
     long double temperature;
-    double coolingRate;
+    long double coolingRate;
+
+    [[nodiscard]] int pathCost(const std::vector<int>& path) const;
+
+    std::vector<int> findShortestPath();
 
 
 public:
-    simulatedAnnealing(const std::vector<std::vector<int>>& matrix, double coolingRate, int stopCriterion, const std::tuple<int, std::vector<int>>&greedyResult);
-
-    int pathCost(const std::vector<int>& path);
-
-    std::vector<int> findShortestPath();
+    simulatedAnnealing(const std::vector<std::vector<int>>& matrix, long double coolingRate, int stopCriterion, const std::tuple<int, std::vector<int>>&greedyResult);
 
     std::tuple<int, std::vector<int>> simulatedAnnealingAlgorithm();
 
