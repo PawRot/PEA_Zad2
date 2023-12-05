@@ -72,6 +72,7 @@ int main(int argc, char **argv) {
             fileOperator::saveResultFile("ftv55_test.csv", {static_cast<int>(coolingRate*10000), averagePathCost, bestPathCost, static_cast<int>(percentageError*10000)});
             // saveResultFile works on integers only, so i multiply by 10000 and then divide by 10000 to get 4 decimal places
             fileOperator::savePathToFile("ftv55_test_path.txt", bestPath);
+            bestPathCost = INT_MAX;
         }
 
 
