@@ -20,6 +20,8 @@ public:
     static void saveResultFile(const std::string &path, const std::vector<long long> &data);
     static void savePathToFile(const std::string &filePath, const std::vector<int> &pathData);
 
+    static void saveEpochsToFile(const std::string &filePath, const std::vector<std::string> &epochValuesAndTimes);
+
     static std::vector<std::vector<int>> loadDataFromFile(const std::string &path);
     static std::vector<int> loadPathFromFile(const std::string &filePath);
 

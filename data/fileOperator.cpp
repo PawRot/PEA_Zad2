@@ -183,6 +183,26 @@ void fileOperator::saveResultFile(const string &path, const vector<long long> &d
     }
 }
 
+void fileOperator::saveEpochsToFile(const std::string &filePath, const std::vector<std::string> &epochValuesAndTimes) {
+    std::ofstream file;
+
+    file.open(filePath, std::ios::out);
+
+    if (file.good()) {
+        cout << "File created successfully" << std::endl;
+    } else {
+        cout << "Failed to create file" << std::endl;
+        return;
+    }
+
+    if(file.is_open()) {
+        int size = static_cast<int>(epochValuesAndTimes.size());
+        for (int i = 0; i < size; ++i){
+            file << epochValuesAndTimes[i] << std::endl;
+        }
+    }
+}
+
 void fileOperator::savePathToFile(const std::string& filePath, const std::vector<int>& pathData) {
     std::ofstream file;
 
