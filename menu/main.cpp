@@ -31,7 +31,7 @@ void calculateCost(const vector<vector<int>> &testData, const vector<int> &path)
 int main(int argc, char **argv) {
     if (argc > 1 && std::string(argv[1]) == "testMode"){ // enter test mode
 
-        auto data = fileOperator::loadXMLDataFromFile("/Users/michal/Developer/Repozytoria/PEA_Zad2/data/ftv55.xml");
+        auto data = fileOperator::loadXMLDataFromFile(R"(E:\Repozytoria\PEA_Zad2\data\ftv55.xml)");
 
         greedy greedy(data);
         const auto greedyResult = greedy.findShortestPath();
@@ -51,6 +51,8 @@ int main(int argc, char **argv) {
         int bestKnownCost = 1608;
 
         int bestPathCost = INT_MAX;
+        int bestPathCostOverAll = INT_MAX;
+        std::vector<string> epochValuesAndTimes = {};
         vector<int> bestPath = {};
 
         std::cout << "Testing file: ftv55.xml" << std::endl;
@@ -65,20 +67,20 @@ int main(int argc, char **argv) {
                 if (std::get<0>(result) < bestPathCost){
                     bestPathCost = std::get<0>(result);
                     bestPath = std::get<1>(result);
+                    epochValuesAndTimes = simulatedAnnealing.epochValuesAndTimes;
                 }
             }
             averagePathCost /= 10;
             double percentageError = (static_cast<double>(averagePathCost) / static_cast<double>(bestKnownCost))*100;
-            fileOperator::saveResultFile("ftv55_test.csv", {static_cast<int>(coolingRate*10000), averagePathCost, bestPathCost, static_cast<int>(percentageError*10000)});
+            fileOperator::saveResultFile("ftv55_test3.csv", {static_cast<int>(coolingRate*10000), averagePathCost, bestPathCost, static_cast<int>(percentageError*10000)});
             // saveResultFile works on integers only, so i multiply by 10000 and then divide by 10000 to get 4 decimal places
-            fileOperator::savePathToFile("ftv55_test_path.txt", bestPath);
+            if (bestPathCost < bestPathCostOverAll){
+                bestPathCostOverAll = bestPathCost;
+                fileOperator::savePathToFile("ftv55_test3_path.txt", bestPath);
+                fileOperator::saveEpochsToFile("ftv55_test3_epoch.csv", epochValuesAndTimes);
+            }
             bestPathCost = INT_MAX;
         }
-
-
-
-
-
         exit(0);
     }
 
@@ -90,7 +92,7 @@ int main(int argc, char **argv) {
     bool stopCriterionSet = false;
     int stopCriterion = 0;
     bool pathLoaded = false;
-    long double tempChangefactor = 0.99;
+    long double tempChangefactor = 0.9999;
     vector<vector<int>> testData;
     vector<int> path;
 
