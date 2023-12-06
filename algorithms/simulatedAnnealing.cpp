@@ -48,12 +48,12 @@ double simulatedAnnealing::calculateStartingTemperature() const {
 }
 
 
-int simulatedAnnealing::pathCost(const std::vector<int>&path) const {
+int simulatedAnnealing::pathCost(const std::vector<int>&testedPath) const {
     int cost = 0;
     for (int i = 0; i < numberOfCities - 1; i++) {
-        cost += matrix[path[i]][path[i+1]];
+        cost += matrix[testedPath[i]][testedPath[i + 1]];
     }
-    cost += matrix[path[numberOfCities-1]][path[0]]; // Return to the starting city
+    cost += matrix[testedPath[numberOfCities - 1]][testedPath[0]]; // Return to the starting city
     return cost;
 }
 
@@ -90,7 +90,6 @@ std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnneali
                 swapIndex2 = index(mt);
             } while (swapIndex1 == swapIndex2);
             std::swap(newPath[swapIndex1], newPath[swapIndex2]);
-
 
             int newCost = pathCost(newPath);
             if (newCost < currentCost) {

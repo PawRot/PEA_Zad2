@@ -21,7 +21,7 @@ private:
     long double temperature;
     long double coolingRate;
 
-    [[nodiscard]] int pathCost(const std::vector<int>& path) const;
+    [[nodiscard]] int pathCost(const std::vector<int>& testedPath) const;
 
     std::tuple<int, std::vector<int>, std::chrono::duration<float>> findShortestPath();
 
