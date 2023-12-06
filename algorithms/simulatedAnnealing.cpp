@@ -22,6 +22,7 @@ double simulatedAnnealing::calculateStartingTemperature() const {
     std::mt19937 mt(rd());
     std::uniform_int_distribution index(0, numberOfCities - 1);
 
+
     int numberOfSwaps = numberOfCities * (numberOfCities-1) * 4;
     // int numberOfSwaps = numberOfCities * numberOfCities * 2;
     numberOfSwaps = numberOfSwaps > 15000 ? 15000 : numberOfSwaps;
@@ -67,11 +68,21 @@ std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnneali
 
     std::chrono::duration<float> timeElapsed = std::chrono::duration<float>::zero();
     const auto start = std::chrono::steady_clock::now();
-
+    int counter = 0;
     while (std::chrono::duration_cast<std::chrono::seconds>(timeElapsed) < std::chrono::seconds(stopCriterion)) {
+
+        if (temperature < 0.0001) {
+            auto rd2 = std::random_device{};
+            auto rand = std::default_random_engine{rd2()};
+            std::shuffle(path.begin(), path.end(), rand);
+            temperature = calculateStartingTemperature();
+            currentCost = pathCost(path);
+        }
+
         std::vector<int> newPath = path;
 
-        for (int i = 0; i <= (numberOfCities*3)/2; i++) {
+        for (int i = 0; i <= (numberOfCities*3); i++) {
+
             const int swapIndex1 = index(mt);
             int swapIndex2;
             do {
@@ -79,12 +90,15 @@ std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnneali
             } while (swapIndex1 == swapIndex2);
             std::swap(newPath[swapIndex1], newPath[swapIndex2]);
 
+
             int newCost = pathCost(newPath);
             if (newCost < currentCost) {
                 path = newPath;
                 currentCost = newCost;
 
                 if (newCost < std::get<0>(bestSolution)) {
+                    counter++;
+                    std::cout << newCost << std::endl;
                     bestSolution = {newCost, newPath, std::chrono::steady_clock::now() - start};
                 }
             } else if (exp((currentCost - newCost) / temperature) > (dist(mt))) {
@@ -99,6 +113,7 @@ std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnneali
 
     // std::cout << std::endl << std::get<0>(bestPath) << std::endl;
     // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(std::get<2>(bestPath)).count() << std::endl;
+    std::cout << "counter: " <<  counter << std::endl;
     return bestSolution;
 }
 

@@ -25,7 +25,7 @@ private:
 
     std::tuple<int, std::vector<int>, std::chrono::duration<float>> findShortestPath();
 
-    double calculateStartingTemperature() const;
+    [[nodiscard]] double calculateStartingTemperature() const;
 
 
 public:
