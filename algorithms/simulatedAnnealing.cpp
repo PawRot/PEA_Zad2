@@ -14,6 +14,7 @@ simulatedAnnealing::simulatedAnnealing(const std::vector<std::vector<int>>&matri
     path = {greedyPath.begin(), greedyPath.end() - 1};
     temperature = calculateStartingTemperature();
     greedyCost = std::get<0>(greedyResult);
+    epochValuesAndTimes = {};
 }
 
 
@@ -100,6 +101,7 @@ std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnneali
                     counter++;
                     std::cout << newCost << std::endl;
                     bestSolution = {newCost, newPath, std::chrono::steady_clock::now() - start};
+                    epochValuesAndTimes.push_back(std::to_string(newCost) + "," + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::get<2>(bestSolution)).count()));
                 }
             } else if (exp((currentCost - newCost) / temperature) > (dist(mt))) {
                 path = newPath;

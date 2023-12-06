@@ -29,6 +29,8 @@ private:
 
 
 public:
+    std::vector<std::string> epochValuesAndTimes;
+
     simulatedAnnealing(const std::vector<std::vector<int>>& matrix, long double coolingRate, int stopCriterion, const std::tuple<int, std::vector<int>>&greedyResult);
 
     std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnnealingAlgorithm();
