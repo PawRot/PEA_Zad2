@@ -13,12 +13,13 @@ simulatedAnnealing::simulatedAnnealing(const std::vector<std::vector<int>>&matri
     auto greedyPath = std::get<1>(greedyResult);
     path = {greedyPath.begin(), greedyPath.end() - 1};
     temperature = calculateStartingTemperature();
+    lowestTemperature = temperature;
     greedyCost = std::get<0>(greedyResult);
     epochValuesAndTimes = {};
 }
 
 
-double simulatedAnnealing::calculateStartingTemperature() const {
+long double simulatedAnnealing::calculateStartingTemperature() const {
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_int_distribution index(0, numberOfCities - 1);
@@ -98,7 +99,7 @@ std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnneali
 
                 if (newCost < std::get<0>(bestSolution)) {
                     counter++;
-                    std::cout << newCost << std::endl;
+//                    std::cout << newCost << std::endl;
                     bestSolution = {newCost, newPath, std::chrono::steady_clock::now() - start};
                     epochValuesAndTimes.push_back(std::to_string(newCost) + "," + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::get<2>(bestSolution)).count()));
                 }
@@ -109,12 +110,15 @@ std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnneali
         }
         // std::cout << temperature << std::endl;
         temperature *= coolingRate;
+        if (temperature < lowestTemperature) {
+            lowestTemperature = temperature;
+        }
         timeElapsed = std::chrono::steady_clock::now() - start;
     }
 
     // std::cout << std::endl << std::get<0>(bestPath) << std::endl;
     // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(std::get<2>(bestPath)).count() << std::endl;
-    std::cout << "counter: " <<  counter << std::endl;
+//    std::cout << "counter: " <<  counter << std::endl;
     return bestSolution;
 }
 

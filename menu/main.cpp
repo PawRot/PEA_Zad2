@@ -31,37 +31,40 @@ void calculateCost(const vector<vector<int>> &testData, const vector<int> &path)
 int main(int argc, char **argv) {
     if (argc > 1 && std::string(argv[1]) == "testMode"){ // enter test mode
 
-        auto data = fileOperator::loadXMLDataFromFile(R"(E:\Repozytoria\PEA_Zad2\data\ftv55.xml)");
+        auto data = fileOperator::loadXMLDataFromFile(R"(E:\Repozytoria\PEA_Zad2\data\rbg358.xml)");
 
         greedy greedy(data);
         const auto greedyResult = greedy.findShortestPath();
 
         static std::vector<double> coolingRates = {};
-        for (int i = 4; i < 10; ++i){
-            coolingRates.push_back(i*0.1);
-        }
-        coolingRates.push_back(0.99);
-        coolingRates.push_back(0.999);
-        coolingRates.push_back(0.9999);
+//        for (int i = 4; i < 10; ++i){
+//            coolingRates.push_back(i*0.1);
+//        }
+//        coolingRates.push_back(0.99);
+//        coolingRates.push_back(0.999);
+//        coolingRates.push_back(0.99999);
+
+        coolingRates.push_back(0.99999);
+//        coolingRates.push_back(0.999999);
 
         for (auto element : coolingRates) {
             std::cout << element << std::endl;
         }
 
-        int bestKnownCost = 1608;
+        int bestKnownCost = 1163;
 
         int bestPathCost = INT_MAX;
         int bestPathCostOverAll = INT_MAX;
         std::vector<string> epochValuesAndTimes = {};
         vector<int> bestPath = {};
 
-        std::cout << "Testing file: ftv55.xml" << std::endl;
+        std::cout << "Testing file: rbg358.xml" << std::endl;
         for (const auto coolingRate : coolingRates) {
             std::cout << "Testing cooling rate: " << coolingRate << std::endl;
             int averagePathCost = 0;
             for (int i = 0; i < 10; ++i) {
                 std::cout << "Test number: " << i << std::endl;
-                simulatedAnnealing simulatedAnnealing(data, coolingRate, 120, greedyResult);
+                simulatedAnnealing simulatedAnnealing(data, coolingRate, 360, greedyResult);
                 const auto result = simulatedAnnealing.simulatedAnnealingAlgorithm();
                 averagePathCost += std::get<0>(result);
                 if (std::get<0>(result) < bestPathCost){
@@ -72,12 +75,12 @@ int main(int argc, char **argv) {
             }
             averagePathCost /= 10;
             double percentageError = (static_cast<double>(averagePathCost) / static_cast<double>(bestKnownCost))*100;
-            fileOperator::saveResultFile("ftv55_test3.csv", {static_cast<int>(coolingRate*10000), averagePathCost, bestPathCost, static_cast<int>(percentageError*10000)});
-            // saveResultFile works on integers only, so i multiply by 10000 and then divide by 10000 to get 4 decimal places
+            fileOperator::saveResultFile("rbg358_test7.csv", {static_cast<int>(coolingRate*100000), averagePathCost, bestPathCost, static_cast<int>(percentageError*100000)});
+            // saveResultFile works on integers only, so i multiply by 100000 and then divide by 100000 to get 5 decimal places
             if (bestPathCost < bestPathCostOverAll){
                 bestPathCostOverAll = bestPathCost;
-                fileOperator::savePathToFile("ftv55_test3_path.txt", bestPath);
-                fileOperator::saveEpochsToFile("ftv55_test3_epoch.csv", epochValuesAndTimes);
+                fileOperator::savePathToFile("rbg358_test7_path.txt", bestPath);
+                fileOperator::saveEpochsToFile("rbg358_test7_epoch.csv", epochValuesAndTimes);
             }
             bestPathCost = INT_MAX;
         }
@@ -92,11 +95,17 @@ int main(int argc, char **argv) {
     bool stopCriterionSet = false;
     int stopCriterion = 0;
     bool pathLoaded = false;
-    long double tempChangefactor = 0.9999;
+    long double tempChangefactor = 0.99999;
     vector<vector<int>> testData;
     vector<int> path;
 
     do {
+        std::cout << "Current temperature change factor: " << tempChangefactor << std::endl;
+        if (stopCriterionSet) {
+            std::cout << "Current stop criterion: " << stopCriterion << " seconds" << std::endl;
+        } else {
+            std::cout << "Stop criterion not set" << std::endl;
+        }
 
         showMenuOptions();
         std::cin >> input;
@@ -142,7 +151,7 @@ int main(int argc, char **argv) {
                 break;
             case 6:
                 if (dataLoaded && stopCriterionSet) {
-                    startSimulatedAnnealing(testData, path, tempChangefactor, stopCriterion, pathLoaded); // TODO uncomment when i finish simulated annealing
+                    startSimulatedAnnealing(testData, path, tempChangefactor, stopCriterion, pathLoaded);
                 } else {
                     std::cout << "No data loaded or no stop criteria set" << std::endl;
                 }
@@ -194,7 +203,9 @@ void showMenuOptions() {
 vector<vector<int>> loadFromFile(bool &dataLoaded) {
     std::cout << "Enter file path: ";
     string filePath;
-    std::cin >> filePath;
+//    std::cin >> filePath;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::getline(std::cin, filePath);
 
     std::cout << "Loading data from file: " << filePath << std::endl;
     // auto data = fileOperator::loadDataFromFile(filePath);
@@ -352,16 +363,20 @@ void startSimulatedAnnealing(const vector<vector<int>>&testData, vector<int>&pat
     path = std::get<1>(result);
     pathLoaded = true;
     const auto endTemperature = simulatedAnnealing.getTemperature();
-    std::cout << "End temperature: " << endTemperature << std::endl;
+    std::cout << "Temperature when execution ended: " << endTemperature << std::endl;
     const auto exponent = exp((-1/endTemperature));
     std::cout << "exp(-1/T_k): " << exponent << std::endl;
+    std::cout << "Lowest temperature: " << simulatedAnnealing.getLowestTemperature() << std::endl;
+    std::cout << "exp(-1/T_min): " << exp((-1/simulatedAnnealing.getLowestTemperature())) << std::endl;
 
 }
 
 void savePathToFile(const vector<int> &path) {
     std::cout << "Enter file path with extension: ";
     string filePath;
-    std::cin >> filePath;
+//    std::cin >> filePath;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::getline(std::cin, filePath);
 
     std::cout << "Saving path to file: " << filePath << std::endl;
     fileOperator::savePathToFile(filePath, path);
@@ -370,7 +385,9 @@ void savePathToFile(const vector<int> &path) {
 vector<int> loadPathFromFile(bool&pathLoaded) {
     std::cout << "Enter file path: ";
     string filePath;
-    std::cin >> filePath;
+//    std::cin >> filePath;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::getline(std::cin, filePath);
 
     std::cout << "Loading data from file: " << filePath << std::endl;
     auto data = fileOperator::loadPathFromFile(filePath);

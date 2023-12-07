@@ -19,13 +19,15 @@ private:
     int numberOfCities;
     int stopCriterion;
     long double temperature;
+    long double lowestTemperature;
     long double coolingRate;
 
     [[nodiscard]] int pathCost(const std::vector<int>& testedPath) const;
 
     std::tuple<int, std::vector<int>, std::chrono::duration<float>> findShortestPath();
 
-    [[nodiscard]] double calculateStartingTemperature() const;
+    [[nodiscard]] long double calculateStartingTemperature() const;
+
 
 
 public:
@@ -37,6 +39,9 @@ public:
 
     [[nodiscard]] long double getTemperature() const {
         return temperature;
+    }
+    [[nodiscard]] long double getLowestTemperature() const {
+        return lowestTemperature;
     }
 
 };
