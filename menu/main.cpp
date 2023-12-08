@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 
         greedyResultType greedyResult;
 
-        static std::vector<long double> coolingRates = {0.99999};
+        static std::vector<long double> coolingRates = {0.999, 0.9999, 0.99999};
 
         for (auto element : coolingRates) {
             std::cout << element << std::endl;
@@ -86,66 +86,6 @@ int main(int argc, char **argv) {
             fileNameEpoch = "rbg358_epoch.csv";
             fileNamePath = "rbg358_path.txt";
             std::cout << "Testing file: rbg358.xml" << std::endl;
-        } else if (std::string(argv[2]) == "4") {
-            data = fileOperator::loadXMLDataFromFile(R"(E:\Repozytoria\PEA_Zad2\data\ftv170.xml)");
-            greedy greedy(data);
-            greedyResult = greedy.findShortestPath();
-            bestKnownCost = 2755;
-            stopCriterion = 240;
-            int lastSavedResult = INT_MAX;
-            fileNameTest = "ftv170_search_results.csv";
-            fileNameEpoch = "ftv170_search_epoch.csv";
-            fileNamePath = "ftv170_search_path.txt";
-            std::cout << "Searching for path better than greedy: ftv170.xml" << std::endl;
-
-            long double coolingRate = 0.99999;
-            int greedyCost = std::get<0>(greedyResult);
-            std::cout << "Testing cooling rate: " << coolingRate << std::endl;
-            namespace fs = std::filesystem;
-            int i = 0;
-            while (true) {
-                std::cout << "Test number: " << i << std::endl;
-                simulatedAnnealing simulatedAnnealing(data, coolingRate, stopCriterion, greedyResult);
-                const auto result = simulatedAnnealing.simulatedAnnealingAlgorithm();
-
-                const auto resultCost = std::get<0>(result);
-                const auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::get<2>(result)).count();
-
-                const double percentageError = (static_cast<double>(resultCost) - static_cast<double>(bestKnownCost)) / static_cast<double>(bestKnownCost);
-
-
-                if (resultCost < greedyCost){
-
-                    if (fs::exists(fileNameTest)){
-                        fs::remove(fileNameTest);
-                        fs::remove(fileNamePath);
-                        fs::remove(fileNameEpoch);
-                    }
-
-                    fileOperator::saveResultFile(fileNameTest, {resultCost, timeElapsed, static_cast<int>(percentageError * 100000)});
-                    fileOperator::savePathToFile(fileNamePath, std::get<1>(result));
-                    fileOperator::saveEpochsToFile(fileNameEpoch, simulatedAnnealing.epochValuesAndTimes);
-                    exit(0);
-
-                } else if (abs(resultCost - greedyCost) < greedyCost * 0.8 && resultCost < lastSavedResult){
-                    lastSavedResult = resultCost;
-
-                    if (fs::exists(fileNameTest)){
-                        fs::remove(fileNameTest);
-                        fs::remove(fileNamePath);
-                        fs::remove(fileNameEpoch);
-                    }
-
-                    fileOperator::saveResultFile(fileNameTest, {resultCost, timeElapsed, static_cast<int>(percentageError * 100000)});
-                    fileOperator::savePathToFile(fileNamePath, std::get<1>(result));
-                    fileOperator::saveEpochsToFile(fileNameEpoch, simulatedAnnealing.epochValuesAndTimes);
-                }
-                if (i == INT_MAX-10) {
-                    i = 0;
-                }
-                i++;
-            }
-
         } else {
             std::cout << "Invalid second argument provided";
             exit(0);
@@ -168,7 +108,7 @@ int main(int argc, char **argv) {
 
 //                double percentageError = (static_cast<double>(resultCost) / static_cast<double>(bestKnownCost))*100;
                 const double percentageError = (static_cast<double>(resultCost) - static_cast<double>(bestKnownCost)) / static_cast<double>(bestKnownCost);
-                fileOperator::saveResultFile(fileNameTest, {resultCost, timeElapsed, static_cast<int>(percentageError * 100000)});
+                fileOperator::saveResultFile(std::to_string(coolingRate)+fileNameTest, {resultCost, timeElapsed, static_cast<int>(percentageError * 100000)});
                 // saveResultFile works on integers only,
                 // so I multiply by 100000 and then divide by 100000 to get 5 decimal places
 
@@ -179,8 +119,8 @@ int main(int argc, char **argv) {
                 }
             }
 
-            fileOperator::savePathToFile(fileNamePath, bestPath);
-            fileOperator::saveEpochsToFile(fileNameEpoch, epochValuesAndTimes);
+            fileOperator::savePathToFile(std::to_string(coolingRate)+fileNamePath, bestPath);
+            fileOperator::saveEpochsToFile(std::to_string(coolingRate)+fileNameEpoch, epochValuesAndTimes);
 
         }
         exit(0);

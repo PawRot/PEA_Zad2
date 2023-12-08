@@ -71,9 +71,10 @@ std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnneali
     std::chrono::duration<float> timeElapsed = std::chrono::duration<float>::zero();
     const auto start = std::chrono::steady_clock::now();
     int counter = 0;
+    bool pathChanged = false;
     while (std::chrono::duration_cast<std::chrono::seconds>(timeElapsed) < std::chrono::seconds(stopCriterion)) {
 
-        if (temperature < 0.0001) {
+        if (temperature < 0.00001 && !pathChanged) {
             auto rd2 = std::random_device{};
             auto rand = std::default_random_engine{rd2()};
             std::shuffle(path.begin(), path.end(), rand);
@@ -82,8 +83,8 @@ std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnneali
         }
 
         std::vector<int> newPath = path;
-
-        for (int i = 0; i <= (numberOfCities*3); i++) {
+        pathChanged = false;
+        for (int i = 0; i <= (numberOfCities*4); i++) {
 
             const int swapIndex1 = index(mt);
             int swapIndex2;
@@ -96,6 +97,7 @@ std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnneali
             if (newCost < currentCost) {
                 path = newPath;
                 currentCost = newCost;
+                pathChanged = true;
 
                 if (newCost < std::get<0>(bestSolution)) {
                     counter++;
@@ -106,6 +108,7 @@ std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnneali
             } else if (exp((currentCost - newCost) / temperature) > (dist(mt))) {
                 path = newPath;
                 currentCost = newCost;
+                pathChanged = true;
             }
         }
         // std::cout << temperature << std::endl;
