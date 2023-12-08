@@ -1,6 +1,3 @@
-//
-// Created by Michał Zychowicz on 03/12/2023.
-//
 
 #ifndef GREEDY_H
 #define GREEDY_H
