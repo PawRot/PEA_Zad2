@@ -56,6 +56,7 @@ int main(int argc, char **argv) {
         string fileNameTest;
         string fileNameEpoch;
         string fileNamePath;
+        string fileNameTemperature;
         if (std::string(argv[2]) == "1") {
             data = fileOperator::loadXMLDataFromFile(R"(E:\Repozytoria\PEA_Zad2\data\ftv55.xml)");
             greedy greedy(data);
@@ -65,6 +66,7 @@ int main(int argc, char **argv) {
             fileNameTest = "ftv55_results.csv";
             fileNameEpoch = "ftv55_epoch.csv";
             fileNamePath = "ftv55_path.txt";
+            fileNameTemperature = "ftv55_temperature.csv";
             std::cout << "Testing file: ftv55.xml" << std::endl;
         } else if (std::string(argv[2]) == "2") {
             data = fileOperator::loadXMLDataFromFile(R"(E:\Repozytoria\PEA_Zad2\data\ftv170.xml)");
@@ -75,6 +77,7 @@ int main(int argc, char **argv) {
             fileNameTest = "ftv170_results.csv";
             fileNameEpoch = "ftv170_epoch.csv";
             fileNamePath = "ftv170_path.txt";
+            fileNameTemperature = "ftv170_temperature.csv";
             std::cout << "Testing file: ftv170.xml" << std::endl;
         } else if (std::string(argv[2]) == "3") {
             data = fileOperator::loadXMLDataFromFile(R"(E:\Repozytoria\PEA_Zad2\data\rbg358.xml)");
@@ -85,6 +88,7 @@ int main(int argc, char **argv) {
             fileNameTest = "rbg358_results.csv";
             fileNameEpoch = "rbg358_epoch.csv";
             fileNamePath = "rbg358_path.txt";
+            fileNameTemperature = "rbg358_temperature.csv";
             std::cout << "Testing file: rbg358.xml" << std::endl;
         } else {
             std::cout << "Invalid second argument provided";
@@ -95,8 +99,11 @@ int main(int argc, char **argv) {
         int bestPathCost = INT_MAX;
         std::vector<string> epochValuesAndTimes = {};
         vector<int> bestPath = {};
+        std::vector<string> temperatures = {};
+
 
         for (const auto coolingRate : coolingRates) {
+            temperatures = {};
             std::cout << "Testing cooling rate: " << coolingRate << std::endl;
             for (int i = 0; i < 10; ++i) {
                 std::cout << "Test number: " << i << std::endl;
@@ -112,6 +119,10 @@ int main(int argc, char **argv) {
                 // saveResultFile works on integers only,
                 // so I multiply by 100000 and then divide by 100000 to get 5 decimal places
 
+                string temperaturesString = std::to_string(simulatedAnnealing.getTemperature()) + "," + std::to_string(simulatedAnnealing.getLowestTemperature());
+
+                temperatures.push_back(temperaturesString);
+
                 if (resultCost < bestPathCost){
                     bestPathCost = resultCost;
                     bestPath = std::get<1>(result);
@@ -121,6 +132,7 @@ int main(int argc, char **argv) {
 
             fileOperator::savePathToFile(std::to_string(coolingRate)+fileNamePath, bestPath);
             fileOperator::saveEpochsToFile(std::to_string(coolingRate)+fileNameEpoch, epochValuesAndTimes);
+            fileOperator::saveEpochsToFile(std::to_string(coolingRate)+fileNameTemperature, temperatures);
 
         }
         exit(0);
