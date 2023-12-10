@@ -4,7 +4,7 @@
 
 
 
-simulatedAnnealing::simulatedAnnealing(const std::vector<std::vector<int>>&matrix, long double coolingRate, int stopCriterion, const std::tuple<int, std::vector<int>>&greedyResult)
+simulatedAnnealing::simulatedAnnealing(const std::vector<std::vector<int>>&matrix, const long double coolingRate, const int stopCriterion, const std::tuple<int, std::vector<int>>&greedyResult)
 : matrix(matrix), stopCriterion(stopCriterion), coolingRate(coolingRate) {
     numberOfCities = static_cast<int>(matrix.size());
     auto greedyPath = std::get<1>(greedyResult);
@@ -23,8 +23,7 @@ long double simulatedAnnealing::calculateStartingTemperature() const {
 
 
     int numberOfSwaps = numberOfCities * (numberOfCities-1) * 4;
-    // int numberOfSwaps = numberOfCities * numberOfCities * 2;
-    numberOfSwaps = numberOfSwaps > 15000 ? 15000 : numberOfSwaps;
+    numberOfSwaps = numberOfSwaps > 15000 ? 15000 : numberOfSwaps; // 15000 is the maximum number of swaps
     int sum = 0;
 
     for (int i = 0; i < numberOfSwaps; i++) {
@@ -35,14 +34,11 @@ long double simulatedAnnealing::calculateStartingTemperature() const {
             swapIndex2 = index(mt);
         } while (swapIndex1 == swapIndex2);
         std::swap(neighborPath[swapIndex1], neighborPath[swapIndex2]);
-        sum += abs(pathCost(path) - pathCost(neighborPath));
-        // sum += (pathCost(path) - pathCost(neighborPath));
+        sum += abs(pathCost(path) - pathCost(neighborPath)); // abs() because the difference can be negative
     }
 
-    sum /= numberOfSwaps;
-    // std::cout << sum << std::endl;
-    // std::cout << (-1*sum)/log(0.99) << std::endl;
-    return (-1*sum)/log(0.99);
+    sum /= numberOfSwaps; // Average difference
+    return (-1*sum)/log(0.99); // 0.99 is the probability of accepting a worse solution
 }
 
 
@@ -60,71 +56,64 @@ std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnneali
 
     std::random_device rd;
     std::mt19937 mt(rd());
-    std::uniform_int_distribution index(0, numberOfCities - 1);
-    std::uniform_real_distribution<double> dist(0.0, 1.0);
+    std::uniform_int_distribution index(0, numberOfCities - 1); // index for swapping cities is from 0 to numberOfCities - 1
+    std::uniform_real_distribution<double> dist(0.0, 1.0); // random double from 0 to 1 for probability of accepting a worse solution
 
     std::tuple<int, std::vector<int>, std::chrono::duration<float>> bestSolution = {INT_MAX, {}, std::chrono::duration<float>::zero()};
 
     std::chrono::duration<float> timeElapsed = std::chrono::duration<float>::zero();
-    const auto start = std::chrono::steady_clock::now();
-    int counter = 0;
-    bool pathChanged = false;
+    const auto start = std::chrono::steady_clock::now(); // start time
+    bool pathChanged = false; // if the path has changed in the last iteration
     while (std::chrono::duration_cast<std::chrono::seconds>(timeElapsed) < std::chrono::seconds(stopCriterion)) {
 
-        if (temperature < 0.00001 && !pathChanged) {
+        if (temperature < 0.00001 && !pathChanged) { // if the temperature is too low and the path hasn't changed in the last iteration, restart the algorithm
             auto rd2 = std::random_device{};
             auto rand = std::default_random_engine{rd2()};
-            std::shuffle(path.begin(), path.end(), rand);
-            temperature = calculateStartingTemperature();
+            std::ranges::shuffle(path, rand); // shuffle the path
+            temperature = calculateStartingTemperature(); // set temperature to the starting temperature
             currentCost = pathCost(path);
         }
 
         std::vector<int> newPath = path;
         pathChanged = false;
-        for (int i = 0; i <= (numberOfCities*4); i++) {
+        for (int i = 0; i <= (numberOfCities*4); i++) { // lentgth of epoch
 
             const int swapIndex1 = index(mt);
             int swapIndex2;
             do {
                 swapIndex2 = index(mt);
-            } while (swapIndex1 == swapIndex2);
-            std::swap(newPath[swapIndex1], newPath[swapIndex2]);
+            } while (swapIndex1 == swapIndex2); // swapIndex1 and swapIndex2 must be different
+            std::swap(newPath[swapIndex1], newPath[swapIndex2]); // swap two cities
 
-            int newCost = pathCost(newPath);
-            if (newCost < currentCost) {
+            int newCost = pathCost(newPath); // calculate the cost of the new path
+            if (newCost < currentCost) { // if the new path is better, accept it
                 path = newPath;
                 currentCost = newCost;
                 pathChanged = true;
 
-                if (newCost < std::get<0>(bestSolution)) {
-                    counter++;
-//                    std::cout << newCost << std::endl;
+                if (newCost < std::get<0>(bestSolution)) { // if the new path is the best so far, save it
                     bestSolution = {newCost, newPath, std::chrono::steady_clock::now() - start};
                     epochValuesAndTimes.push_back(std::to_string(newCost) + "," + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::get<2>(bestSolution)).count()));
                 }
-            } else if (exp((currentCost - newCost) / temperature) > (dist(mt))) {
+            } else if (exp((currentCost - newCost) / temperature) > (dist(mt))) { // if the new path is worse, accept it with a probability
                 path = newPath;
                 currentCost = newCost;
                 pathChanged = true;
             }
         }
-        // std::cout << temperature << std::endl;
-        temperature *= coolingRate;
-        if (temperature < lowestTemperature) {
+        temperature *= coolingRate; // cool the temperature
+        if (temperature < lowestTemperature) { // save the lowest temperature
             lowestTemperature = temperature;
         }
-        timeElapsed = std::chrono::steady_clock::now() - start;
+        timeElapsed = std::chrono::steady_clock::now() - start; // calculate the time elapsed
     }
 
-    // std::cout << std::endl << std::get<0>(bestPath) << std::endl;
-    // std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(std::get<2>(bestPath)).count() << std::endl;
-//    std::cout << "counter: " <<  counter << std::endl;
     return bestSolution;
 }
 
-std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnnealing::simulatedAnnealingAlgorithm() {
+std::tuple<int, std::vector<int>, std::chrono::duration<float>> simulatedAnnealing::simulatedAnnealingAlgorithm() { // return the best path and its cost
     auto result = findShortestPath();
-    std::get<1>(result).push_back(std::get<1>(result)[0]);
+    std::get<1>(result).push_back(std::get<1>(result)[0]); // add the starting city to the end of the path
     return result;
 }
 

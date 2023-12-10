@@ -20,4 +20,6 @@ add_executable(PEA_Zad2 menu/main.cpp
         algorithms/simulatedAnnealing.cpp
         algorithms/simulatedAnnealing.h
         algorithms/greedy.cpp
-        algorithms/greedy.h)
+        algorithms/greedy.h
+        tests/tester.cpp
+        tests/tester.h)

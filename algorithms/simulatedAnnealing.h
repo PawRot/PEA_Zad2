@@ -3,8 +3,6 @@
 #define SIMULATEDANNEALING_H
 
 #include <vector>
-#include <algorithm>
-#include <cmath>
 #include <chrono>
 #include <random>
 
@@ -15,15 +13,15 @@ private:
     int greedyCost;
     int numberOfCities;
     int stopCriterion;
-    long double temperature;
-    long double lowestTemperature;
+    long double temperature; // current temperature
+    long double lowestTemperature; // lowest temperature reached by the algorithm
     long double coolingRate;
 
-    [[nodiscard]] int pathCost(const std::vector<int>& testedPath) const;
+    [[nodiscard]] int pathCost(const std::vector<int>& testedPath) const; // calculates the curent path cost
 
-    std::tuple<int, std::vector<int>, std::chrono::duration<float>> findShortestPath();
+    std::tuple<int, std::vector<int>, std::chrono::duration<float>> findShortestPath(); // runs the algorithm
 
-    [[nodiscard]] long double calculateStartingTemperature() const;
+    [[nodiscard]] long double calculateStartingTemperature() const; // calculates the starting temperature
 
 
 
