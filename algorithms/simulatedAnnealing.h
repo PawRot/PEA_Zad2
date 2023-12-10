@@ -5,6 +5,7 @@
 #include <vector>
 #include <chrono>
 #include <random>
+#include <algorithm>
 
 class simulatedAnnealing {
 private:
